@@ -15,7 +15,6 @@ func main() {
 	n := NearestZero{
 		houseNumbers: houseNumbers,
 		streetLen:    streetLen,
-		tempSlice:    make([]int, 0, streetLen/3),
 	}
 	n.run()
 
@@ -27,79 +26,60 @@ type NearestZero struct {
 	currentKey         int
 	currentHouseNumber int
 	count              int
-	tempSliceLen       int
 
 	zeroFound bool
 
 	houseNumbers    []int
-	tempSlice       []int
 	nearestZeroList []int
-}
-
-func (n *NearestZero) refreshTempSlice() {
-	n.tempSlice = make([]int, 0, (n.streetLen-n.currentKey)/3)
-	n.tempSliceLen = 0
 }
 
 func (n *NearestZero) run() {
 	n.nearestZeroList = make([]int, 0, n.streetLen)
-	n.count = 1
+	n.count = 0
 	var middleIndex, remainder int
 	for n.currentKey, n.currentHouseNumber = range n.houseNumbers {
+
 		if !n.zeroFound {
 			if n.currentHouseNumber != 0 {
-				n.tempSlice = append(n.tempSlice, n.count)
 				n.count++
 				continue
 			}
 
 			if n.currentHouseNumber == 0 {
-				for i := len(n.tempSlice) - 1; i >= 0; i-- {
-					n.nearestZeroList = append(n.nearestZeroList, n.tempSlice[i])
+				for i := n.count; i > 0; i-- {
+					n.nearestZeroList = append(n.nearestZeroList, i)
 				}
-				n.refreshTempSlice()
+				n.zeroFound = true
+				n.count = 0
 			}
 		}
 
 		if n.currentHouseNumber == 0 {
-			if !n.zeroFound {
-				n.zeroFound = true
-			}
+			if n.count > 0 {
+				middleIndex = n.count / 2
+				remainder = n.count % 2
 
-			n.count = 1
-			n.tempSliceLen = len(n.tempSlice)
-
-			if n.tempSliceLen <= 1 {
-				n.nearestZeroList = append(n.nearestZeroList, n.tempSlice...)
-				n.refreshTempSlice()
-			}
-
-			if n.tempSliceLen > 1 {
-				middleIndex = n.tempSliceLen / 2
-				remainder = n.tempSliceLen % 2
-
-				n.tempSlice = n.tempSlice[:middleIndex]
-				n.nearestZeroList = append(n.nearestZeroList, n.tempSlice...)
+				for i := 1; i <= middleIndex; i++ {
+					n.nearestZeroList = append(n.nearestZeroList, i)
+				}
 				if remainder != 0 {
 					n.nearestZeroList = append(n.nearestZeroList, middleIndex+1)
 				}
-				for i := middleIndex - 1; i >= 0; i-- {
-					n.nearestZeroList = append(n.nearestZeroList, n.tempSlice[i])
+				for i := middleIndex; i > 0; i-- {
+					n.nearestZeroList = append(n.nearestZeroList, i)
 				}
-				n.refreshTempSlice()
+				n.count = 0
 			}
 			n.nearestZeroList = append(n.nearestZeroList, 0)
 		}
 
 		if n.currentHouseNumber != 0 && n.zeroFound {
-			n.tempSlice = append(n.tempSlice, n.count)
-			n.tempSliceLen++
 			n.count++
 		}
 
 	}
-	if n.tempSliceLen > 0 {
-		n.nearestZeroList = append(n.nearestZeroList, n.tempSlice...)
+	for i := 1; i <= n.count; i++ {
+		n.nearestZeroList = append(n.nearestZeroList, i)
 	}
 }
 
