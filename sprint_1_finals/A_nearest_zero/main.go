@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -16,6 +15,7 @@ func main() {
 	n := NearestZero{
 		houseNumbers: houseNumbers,
 		streetLen:    streetLen,
+		tempSlice:    make([]int, 0, streetLen/3),
 	}
 	n.run()
 
@@ -46,14 +46,24 @@ func (n *NearestZero) run() {
 	n.count = 1
 	var middleIndex, remainder int
 	for n.currentKey, n.currentHouseNumber = range n.houseNumbers {
-		n.houseNumbersFirstNumberNotZero()
+		if !n.zeroFound {
+			if n.currentHouseNumber != 0 {
+				n.tempSlice = append(n.tempSlice, n.count)
+				n.count++
+				continue
+			}
+
+			if n.currentHouseNumber == 0 {
+				for i := len(n.tempSlice) - 1; i >= 0; i-- {
+					n.nearestZeroList = append(n.nearestZeroList, n.tempSlice[i])
+				}
+				n.refreshTempSlice()
+			}
+		}
 
 		if n.currentHouseNumber == 0 {
 			if !n.zeroFound {
 				n.zeroFound = true
-			}
-			if n.tempSlice == nil {
-				n.refreshTempSlice()
 			}
 
 			n.count = 1
@@ -70,15 +80,12 @@ func (n *NearestZero) run() {
 
 				n.tempSlice = n.tempSlice[:middleIndex]
 				n.nearestZeroList = append(n.nearestZeroList, n.tempSlice...)
-
-				sort.Slice(n.tempSlice, func(i, j int) bool {
-					return n.tempSlice[i] > n.tempSlice[j]
-				})
 				if remainder != 0 {
 					n.nearestZeroList = append(n.nearestZeroList, middleIndex+1)
 				}
-				n.nearestZeroList = append(n.nearestZeroList, n.tempSlice...)
-
+				for i := middleIndex - 1; i >= 0; i-- {
+					n.nearestZeroList = append(n.nearestZeroList, n.tempSlice[i])
+				}
 				n.refreshTempSlice()
 			}
 			n.nearestZeroList = append(n.nearestZeroList, 0)
@@ -93,24 +100,6 @@ func (n *NearestZero) run() {
 	}
 	if n.tempSliceLen > 0 {
 		n.nearestZeroList = append(n.nearestZeroList, n.tempSlice...)
-	}
-}
-
-func (n *NearestZero) houseNumbersFirstNumberNotZero() {
-	if n.zeroFound {
-		return
-	}
-
-	if n.currentHouseNumber != 0 {
-		n.nearestZeroList = append(n.nearestZeroList, n.count)
-		n.count++
-	}
-
-	if n.currentHouseNumber == 0 {
-		sort.Slice(n.nearestZeroList[:n.currentKey], func(i, j int) bool {
-			return n.nearestZeroList[i] > n.nearestZeroList[j]
-		})
-		return
 	}
 }
 
