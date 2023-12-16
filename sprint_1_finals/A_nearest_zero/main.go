@@ -29,8 +29,7 @@ type NearestZero struct {
 	count              int
 	tempSliceLen       int
 
-	zeroFound       bool
-	isZeroTempSlice bool
+	zeroFound bool
 
 	houseNumbers    []int
 	tempSlice       []int
@@ -38,32 +37,18 @@ type NearestZero struct {
 }
 
 func (n *NearestZero) refreshTempSlice() {
-	n.tempSlice = make([]int, 0, n.streetLen-n.currentKey)
+	n.tempSlice = make([]int, 0, (n.streetLen-n.currentKey)/3)
 	n.tempSliceLen = 0
 }
 
 func (n *NearestZero) run() {
 	n.nearestZeroList = make([]int, 0, n.streetLen)
 	n.count = 1
+	var middleIndex, remainder int
 	for n.currentKey, n.currentHouseNumber = range n.houseNumbers {
 		n.houseNumbersFirstNumberNotZero()
 
-		if len(n.tempSlice) > 0 && n.tempSlice[n.tempSliceLen-1] == 0 && n.currentHouseNumber == 0 {
-			n.isZeroTempSlice = true
-		}
-
-		if n.isZeroTempSlice && n.currentKey < n.streetLen && n.houseNumbers[n.currentKey+1] != 0 {
-			n.nearestZeroList = append(n.nearestZeroList, n.tempSlice...)
-			n.isZeroTempSlice = false
-			n.refreshTempSlice()
-		}
-
-		if n.isZeroTempSlice {
-			n.tempSlice = append(n.tempSlice, 0)
-			continue
-		}
-
-		if n.currentHouseNumber == 0 && !n.isZeroTempSlice {
+		if n.currentHouseNumber == 0 {
 			if !n.zeroFound {
 				n.zeroFound = true
 			}
@@ -74,28 +59,25 @@ func (n *NearestZero) run() {
 			n.count = 1
 			n.tempSliceLen = len(n.tempSlice)
 
-			if n.tempSliceLen <= 2 {
+			if n.tempSliceLen <= 1 {
 				n.nearestZeroList = append(n.nearestZeroList, n.tempSlice...)
 				n.refreshTempSlice()
 			}
 
-			if n.tempSliceLen > 2 {
-				middleIndex := n.tempSliceLen / 2
-				remainder := n.tempSliceLen % 2
+			if n.tempSliceLen > 1 {
+				middleIndex = n.tempSliceLen / 2
+				remainder = n.tempSliceLen % 2
 
-				tempSliceBegin := n.tempSlice[:middleIndex]
-				tempSliceEnd := make([]int, 0, len(tempSliceBegin))
-				tempSliceEnd = append(tempSliceEnd, tempSliceBegin...)
+				n.tempSlice = n.tempSlice[:middleIndex]
+				n.nearestZeroList = append(n.nearestZeroList, n.tempSlice...)
 
-				sort.Slice(tempSliceEnd, func(i, j int) bool {
-					return tempSliceEnd[i] > tempSliceEnd[j]
+				sort.Slice(n.tempSlice, func(i, j int) bool {
+					return n.tempSlice[i] > n.tempSlice[j]
 				})
-
-				n.nearestZeroList = append(n.nearestZeroList, tempSliceBegin...)
 				if remainder != 0 {
 					n.nearestZeroList = append(n.nearestZeroList, middleIndex+1)
 				}
-				n.nearestZeroList = append(n.nearestZeroList, tempSliceEnd...)
+				n.nearestZeroList = append(n.nearestZeroList, n.tempSlice...)
 
 				n.refreshTempSlice()
 			}
@@ -109,7 +91,7 @@ func (n *NearestZero) run() {
 		}
 
 	}
-	if len(n.tempSlice) > 0 {
+	if n.tempSliceLen > 0 {
 		n.nearestZeroList = append(n.nearestZeroList, n.tempSlice...)
 	}
 }
@@ -159,7 +141,7 @@ func printArray(arr []int) {
 }
 
 func makeScanner() *bufio.Scanner {
-	const maxCapacity = 3 * 1024 * 1024
+	const maxCapacity = 20 * 1024 * 1024
 	buf := make([]byte, maxCapacity)
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Buffer(buf, maxCapacity)
