@@ -35,10 +35,8 @@ type NearestZero struct {
 
 func (n *NearestZero) run() {
 	n.nearestZeroList = make([]int, 0, n.streetLen)
-	n.count = 0
-	var middleIndex, remainder int
+	var middle int
 	for n.currentKey, n.currentHouseNumber = range n.houseNumbers {
-
 		if !n.zeroFound {
 			if n.currentHouseNumber != 0 {
 				n.count++
@@ -56,16 +54,14 @@ func (n *NearestZero) run() {
 
 		if n.currentHouseNumber == 0 {
 			if n.count > 0 {
-				middleIndex = n.count / 2
-				remainder = n.count % 2
-
-				for i := 1; i <= middleIndex; i++ {
+				middle = n.count / 2
+				for i := 1; i <= middle; i++ {
 					n.nearestZeroList = append(n.nearestZeroList, i)
 				}
-				if remainder != 0 {
-					n.nearestZeroList = append(n.nearestZeroList, middleIndex+1)
+				if n.count%2 != 0 {
+					n.nearestZeroList = append(n.nearestZeroList, middle+1)
 				}
-				for i := middleIndex; i > 0; i-- {
+				for i := middle; i > 0; i-- {
 					n.nearestZeroList = append(n.nearestZeroList, i)
 				}
 				n.count = 0
