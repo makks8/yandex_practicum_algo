@@ -12,71 +12,51 @@ func main() {
 	streetLen := readInt(scanner)
 	houseNumbers := readArray(scanner)
 
-	n := NearestZero{
-		houseNumbers: houseNumbers,
-		streetLen:    streetLen,
-	}
-	n.run()
+	nearestZeroList := getNearestZero(houseNumbers, streetLen)
 
-	printArray(n.nearestZeroList)
+	printArray(nearestZeroList)
 }
 
-type NearestZero struct {
-	streetLen          int
-	currentKey         int
-	currentHouseNumber int
-	count              int
+func getNearestZero(houseNumbers []int, streetLen int) []int {
+	nearestZeroList := make([]int, 0, streetLen)
+	var zeroFound, isCurrentHouseNumberZero bool
+	var houseCounter int
+	for _, currentHouseNumber := range houseNumbers {
+		isCurrentHouseNumberZero = currentHouseNumber == 0
 
-	zeroFound bool
-
-	houseNumbers    []int
-	nearestZeroList []int
-}
-
-func (n *NearestZero) run() {
-	n.nearestZeroList = make([]int, 0, n.streetLen)
-	var middle int
-	for n.currentKey, n.currentHouseNumber = range n.houseNumbers {
-		if !n.zeroFound {
-			if n.currentHouseNumber != 0 {
-				n.count++
-				continue
+		if isCurrentHouseNumberZero && !zeroFound {
+			for i := houseCounter; i > 0; i-- {
+				nearestZeroList = append(nearestZeroList, i)
 			}
-
-			if n.currentHouseNumber == 0 {
-				for i := n.count; i > 0; i-- {
-					n.nearestZeroList = append(n.nearestZeroList, i)
-				}
-				n.zeroFound = true
-				n.count = 0
-			}
+			zeroFound = true
+			houseCounter = 0
 		}
 
-		if n.currentHouseNumber == 0 {
-			if n.count > 0 {
-				middle = n.count / 2
+		if isCurrentHouseNumberZero && zeroFound {
+			if houseCounter > 0 {
+				middle := houseCounter / 2
 				for i := 1; i <= middle; i++ {
-					n.nearestZeroList = append(n.nearestZeroList, i)
+					nearestZeroList = append(nearestZeroList, i)
 				}
-				if n.count%2 != 0 {
-					n.nearestZeroList = append(n.nearestZeroList, middle+1)
+				if houseCounter%2 != 0 {
+					nearestZeroList = append(nearestZeroList, middle+1)
 				}
 				for i := middle; i > 0; i-- {
-					n.nearestZeroList = append(n.nearestZeroList, i)
+					nearestZeroList = append(nearestZeroList, i)
 				}
-				n.count = 0
+				houseCounter = 0
 			}
-			n.nearestZeroList = append(n.nearestZeroList, 0)
+			nearestZeroList = append(nearestZeroList, 0)
 		}
 
-		if n.currentHouseNumber != 0 && n.zeroFound {
-			n.count++
+		if !isCurrentHouseNumberZero {
+			houseCounter++
 		}
-
 	}
-	for i := 1; i <= n.count; i++ {
-		n.nearestZeroList = append(n.nearestZeroList, i)
+	for i := 1; i <= houseCounter; i++ {
+		nearestZeroList = append(nearestZeroList, i)
 	}
+	return nearestZeroList
 }
 
 func readArray(scanner *bufio.Scanner) []int {
