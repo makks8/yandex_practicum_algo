@@ -12,33 +12,37 @@ func main() {
 	handSize := readInt(scanner)
 	handSize = handSize * 2
 
-	numbersMap := make(map[string]int, 10)
+	numbers := make([]int, 10)
 
 	for i := 0; i < 4; i++ {
 		scanner.Scan()
 		row := scanner.Text()
-		a := string(row[0])
-		numbersMap[a] = numbersMap[a] + 1
-		b := string(row[1])
-		numbersMap[b] = numbersMap[b] + 1
-		c := string(row[2])
-		numbersMap[c] = numbersMap[c] + 1
-		d := string(row[3])
-		numbersMap[d] = numbersMap[d] + 1
+
+		addValue(row[0], numbers)
+		addValue(row[1], numbers)
+		addValue(row[2], numbers)
+		addValue(row[3], numbers)
 	}
 
 	var points int
-	for key, value := range numbersMap {
-		if key == "." {
+	for _, value := range numbers {
+		if value == 0 {
 			continue
 		}
-
 		if value <= handSize {
 			points++
 		}
 	}
 
 	printInt(points)
+}
+
+func addValue(value uint8, numbers []int) {
+	if value == 46 {
+		return
+	}
+	number := int(value - '0')
+	numbers[number] += 1
 }
 
 func readInt(scanner *bufio.Scanner) int {

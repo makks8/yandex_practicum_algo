@@ -9,54 +9,52 @@ import (
 
 func main() {
 	scanner := makeScanner()
-	streetLen := readInt(scanner)
+	_ = readInt(scanner)
 	houseNumbers := readArray(scanner)
 
-	nearestZeroList := getNearestZero(houseNumbers, streetLen)
+	nearestZeroList := getNearestZero(houseNumbers)
 
 	printArray(nearestZeroList)
 }
 
-func getNearestZero(houseNumbers []int, streetLen int) []int {
-	nearestZeroList := make([]int, 0, streetLen)
-	var zeroFound, isCurrentHouseNumberZero bool
-	var houseCounter int
-	for _, currentHouseNumber := range houseNumbers {
-		isCurrentHouseNumberZero = currentHouseNumber == 0
-
-		if isCurrentHouseNumberZero && !zeroFound {
-			for i := houseCounter; i > 0; i-- {
-				nearestZeroList = append(nearestZeroList, i)
+func getNearestZero(houseNumbers []int) []int {
+	var firstZeroIndex, lastZeroIndex int
+	var firstZeroFound bool
+	var counter = 1
+	for index, currentHouse := range houseNumbers {
+		if currentHouse == 0 {
+			if !firstZeroFound {
+				firstZeroIndex = index
+				firstZeroFound = true
 			}
-			zeroFound = true
-			houseCounter = 0
+			lastZeroIndex = index
+			counter = 1
+			continue
 		}
-
-		if isCurrentHouseNumberZero && zeroFound {
-			if houseCounter > 0 {
-				middle := houseCounter / 2
-				for i := 1; i <= middle; i++ {
-					nearestZeroList = append(nearestZeroList, i)
-				}
-				if houseCounter%2 != 0 {
-					nearestZeroList = append(nearestZeroList, middle+1)
-				}
-				for i := middle; i > 0; i-- {
-					nearestZeroList = append(nearestZeroList, i)
-				}
-				houseCounter = 0
-			}
-			nearestZeroList = append(nearestZeroList, 0)
-		}
-
-		if !isCurrentHouseNumberZero {
-			houseCounter++
-		}
+		houseNumbers[index] = counter
+		counter++
 	}
-	for i := 1; i <= houseCounter; i++ {
-		nearestZeroList = append(nearestZeroList, i)
+
+	var middle int
+	for index := lastZeroIndex; index >= 0; index-- {
+		if index == firstZeroIndex {
+			middle = index
+			counter = 1
+			continue
+		}
+		if houseNumbers[index] == 0 {
+			middle = houseNumbers[index-1] / 2
+			counter = 1
+			continue
+		}
+		if counter > middle {
+			continue
+		}
+		houseNumbers[index] = counter
+		counter++
 	}
-	return nearestZeroList
+
+	return houseNumbers
 }
 
 func readArray(scanner *bufio.Scanner) []int {
